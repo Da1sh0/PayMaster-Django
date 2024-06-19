@@ -1,18 +1,19 @@
-
+from rest_framework.routers import DefaultRouter # type: ignore
+from .views import IndependienteViewSet, CalculosViewSet, NovedadesViewSet
 from django.urls import path, include # type: ignore
-from . import views
-from rest_framework import routers
 
-router=routers.DefaultRouter()
-router.register(r'independienterest', views.IndependienteViewSet)
+independiente_router = DefaultRouter()
+independiente_router.register(r'independienterest', IndependienteViewSet)
 
-router=routers.DefaultRouter()
-router.register(r'calculosrest', views.CalculosViewSet)
+calculos_router = DefaultRouter()
+calculos_router.register(r'calculosrest', CalculosViewSet)
 
-router=routers.DefaultRouter()
-router.register(r'novedadesrest', views.NovedadesViewSet)
+novedades_router= DefaultRouter()
+novedades_router.register(r'novedadesrest', NovedadesViewSet)
 
 urlpatterns = [
-    path('',include(router.urls)),
+    path('inde',include(independiente_router.urls)),
+    path('calcu',include(calculos_router.urls)),
+    path('nove',include(novedades_router.urls)),
  
 ]
