@@ -12,7 +12,7 @@ class EmpleadoViewSet(viewsets.ModelViewSet):
     queryset=Empleado.objects.all()
     serializer_class=EmpleadoSerializer
 
-class CalculoViewSet(viewsets.ModelViewSet):
+class CalculosViewSet(viewsets.ModelViewSet):
     queryset=Calculos.objects.all()
     serializer_class=CalculosSerializer
 
