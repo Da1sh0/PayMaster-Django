@@ -1,10 +1,12 @@
-from django.db import models
-from django.contrib.auth.hashers import make_password, check_password
-from django.contrib.auth.models import Permission
-from django.contrib.auth.hashers import check_password as django_check_password
-from django.core.validators import MaxValueValidator,MinValueValidator
-from django.utils import timezone
-from django.utils.timezone import timedelta
+from django.db import models # type: ignore
+from django.contrib.auth.hashers import make_password, check_password # type: ignore
+from django.contrib.auth.models import Permission # type: ignore
+from django.contrib.auth.hashers import check_password as django_check_password # type: ignore
+from django.core.validators import MaxValueValidator,MinValueValidator # type: ignore
+from django.utils import timezone # type: ignore
+from django.utils.timezone import timedelta # type: ignore
+from rest_framework import serializers # type: ignore
+
 
 
 class Independiente(models.Model):
@@ -31,15 +33,21 @@ class Independiente(models.Model):
     segundo_nombre = models.CharField(max_length=30, blank=True, null=True)
     primer_apellido = models.CharField(max_length=30)
     segundo_apellido = models.CharField(max_length=30, blank=True, null=True)
-    estado_civil = models.CharField(max_length=20, choices=estado_civil)
-    tipo_documento = models.CharField(max_length=50, choices=tipo_documento)
+    estado_civil = models.CharField(max_length=20)
+    tipo_documento = models.CharField(max_length=50)
     correo = models.EmailField(unique=True)
     celular = models.CharField(max_length=15)
-    genero = models.CharField(max_length=10,choices=genero)
+    genero = models.CharField(max_length=10)
     fecha_nacimiento = models.DateField()
     fecha_exp_documento = models.DateField()
     fecha_ingreso= models.DateField(blank=True, null=True)
     imagen=models.ImageField(upload_to='photos', blank=True, null=True)
+
+class IndependienteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Independiente
+        fields = '__all__'
+        # fields = ['numero_identificacion', 'documento', 'ficha', 'programa', 'photo']
 
 class Calculos(models.Model):
     documento = models.ForeignKey(Independiente, on_delete=models.CASCADE)
