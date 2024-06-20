@@ -39,7 +39,7 @@ class Independiente(models.Model):
     fecha_nacimiento = models.DateField()
     fecha_exp_documento = models.DateField()
     fecha_ingreso= models.DateField(blank=True, null=True)
-    imagen=models.ImageField(upload_to='photos')
+    imagen=models.ImageField(upload_to='photos', blank=True, null=True)
 
 class Calculos(models.Model):
     documento = models.ForeignKey(Independiente, on_delete=models.CASCADE)
