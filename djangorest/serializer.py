@@ -1,5 +1,5 @@
 from rest_framework import serializers # type: ignore
-from . models import Independiente, Calculos, Novedades
+from . models import Independiente, Calculos
 
 class IndependienteSerializer(serializers.ModelSerializer):
     
@@ -13,8 +13,3 @@ class CalculosSerializer(serializers.ModelSerializer):
         model = Calculos
         fields = '__all__'
         
-class NovedadesSerializer(serializers.ModelSerializer):
-    
-    class Meta:
-        model = Novedades
-        fields = '__all__'

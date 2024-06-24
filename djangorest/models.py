@@ -10,23 +10,23 @@ from rest_framework import serializers # type: ignore
 
 
 class Independiente(models.Model):
-    estado_civil=[
-        ('SOLTERO', 'Soltero/a'),
-        ('CASADO', 'Casado/a'),
-        ('DIVORCIADO', 'Divorciado/a'),
-        ('VIUDO', 'Viudo/a'),
-    ]
-    tipo_documento=[
-        ('Cc', 'Cedula de ciudadania'),
-        ('Ce', 'Cedula de extrangeria'),
-        ('Passpor', 'Pasaporte'),
-    ]
-    genero=[
-        ('M', 'Masculino'),
-        ('F', 'Femenino'),
-        ('O', 'Otro'),
-        ('P', 'Prefiero no decir'),
-    ]
+    # estado_civil=[
+    #     ('SOLTERO', 'Soltero/a'),
+    #     ('CASADO', 'Casado/a'),
+    #     ('DIVORCIADO', 'Divorciado/a'),
+    #     ('VIUDO', 'Viudo/a'),
+    # ]
+    # tipo_documento=[
+    #     ('Cc', 'Cedula de ciudadania'),
+    #     ('Ce', 'Cedula de extrangeria'),
+    #     ('Passpor', 'Pasaporte'),
+    # ]
+    # genero=[
+    #     ('M', 'Masculino'),
+    #     ('F', 'Femenino'),
+    #     ('O', 'Otro'),
+    #     ('P', 'Prefiero no decir'),
+    # ]
 
     numero_identificacion = models.CharField(primary_key=True, max_length=20)
     primer_nombre = models.CharField(max_length=30)
@@ -38,15 +38,16 @@ class Independiente(models.Model):
     correo = models.EmailField(unique=True)
     celular = models.CharField(max_length=15)
     genero = models.CharField(max_length=10)
+    salairo_base=models.IntegerField(default=1300000)
     fecha_nacimiento = models.DateField()
     fecha_exp_documento = models.DateField()
     fecha_ingreso= models.DateField(blank=True, null=True)
     imagen=models.ImageField(upload_to='photos', blank=True, null=True)
 
-class IndependienteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Independiente
-        fields = '__all__'
+# class IndependienteSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Independiente
+#         fields = '__all__'
         # fields = ['numero_identificacion', 'documento', 'ficha', 'programa', 'photo']
 
 class Calculos(models.Model):
@@ -60,13 +61,13 @@ class Calculos(models.Model):
     interesCesantias=models.FloatField(blank=True,null=True)
     vacaciones=models.FloatField(blank=True,null=True)
     
-class Novedades(models.Model):
-    empleado = models.ForeignKey(Independiente, on_delete=models.CASCADE)
-    HorasExDiu=models.IntegerField(validators=[MaxValueValidator(48),MinValueValidator(0)],blank=True,null=True)
-    HorasExNoc=models.IntegerField(validators=[MaxValueValidator(48),MinValueValidator(0)],blank=True,null=True)
-    HorasExFestivaDiu=models.IntegerField(validators=[MaxValueValidator(48),MinValueValidator(0)],blank=True,null=True)
-    HorasExFestivaNoc=models.IntegerField(validators=[MaxValueValidator(48),MinValueValidator(0)],blank=True,null=True)
-    
-    recargoDiuFes=models.IntegerField(blank=True,null=True)
-    recargoNoc=models.IntegerField(blank=True,null=True)
-    recargoNocFest=models.IntegerField(blank=True,null=True)
+class DatosCalculos(models.Model):
+
+    documento = models.ForeignKey(Independiente, on_delete=models.CASCADE)
+    salarioBase=models.FloatField(null=True, blank=True)
+    ibc=models.FloatField(validators=[MaxValueValidator(100),MinValueValidator(40)],null=True)
+    salud=models.FloatField( max_length=50, default=12.5)
+    pension=models.FloatField(max_length=50, default=16)
+    arl=models.FloatField(blank=True,null=True, max_length=25)
+    CCF=models.FloatField(blank=True,null=True,  max_length=25)
+    FSP=models.FloatField(blank=True,null=True,  max_length=25)
