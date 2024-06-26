@@ -1,90 +1,50 @@
+# views.py
 from rest_framework.views import APIView # type: ignore
 from rest_framework.response import Response # type: ignore
 from rest_framework import status, viewsets # type: ignore
-from . serializer import IndependienteSerializer, CalculosSerializer
+from .serializer import IndependienteSerializer, CalculosSerializer
 from .models import Independiente, Calculos, DatosCalculos
-from django.shortcuts import render, get_object_or_404 # type: ignore
-from django.http import JsonResponse # type: ignore
-from .forms import DatosCalculosForm # type: ignore
-
+from django.http import Http404 # type: ignore
+from django.shortcuts import get_object_or_404 # type: ignore
+from .calculos import calcular_salario_base, calcular_ibc, calcular_salud, calcular_pension, calcular_arl, calcular_ccf
 
 class IndependienteViewSet(viewsets.ModelViewSet):
     queryset = Independiente.objects.all()
     serializer_class = IndependienteSerializer
 
-
-class IndependienteCreate(APIView):
-    def post(self, request, format=None):
-        serializer = IndependienteSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 class CalculosViewSet(viewsets.ModelViewSet):
     queryset = Calculos.objects.all()
     serializer_class = CalculosSerializer
 
-
 class CalculosGenerales(APIView):
-    def post(self, request, numero_identificacion):
-        independiente = get_object_or_404(Independiente, pk=numero_identificacion)
+    def get(self, request, numero_identificacion, format=None):
+        try:
+            independiente = get_object_or_404(Independiente, numero_identificacion=numero_identificacion)
+            
+            # Realizar los cálculos utilizando las funciones importadas
+            salario_base = calcular_salario_base(independiente)
+            ibc = calcular_ibc(independiente)
+            salud = calcular_salud(independiente)
+            pension = calcular_pension(independiente)
+            arl = calcular_arl(independiente)
+            ccf = calcular_ccf(independiente)
 
-        datos_calculos, created = DatosCalculos.objects.get_or_create(documento=independiente)
-        form = DatosCalculosForm(request.POST, instance=datos_calculos)
-        if form.is_valid():
-            calculos = form.save(commit=False)
-            if created:
-                calculos.documento = independiente
-            calculos.save()
+            # Crear una instancia de Calculos con los resultados calculados
+            calculos = Calculos.objects.create(
+                documento=independiente,
+                salud=salud,
+                pension=pension,
+                arl=arl,
+                salarioBase=salario_base,
+                cajaCompensacion=ccf,
+                # Agrega los demás campos según sea necesario
+            )
 
-        datos_calculos = DatosCalculos.objects.filter(documento=independiente)
-        for objeto in datos_calculos:
-            salario_base = objeto.salarioBase
-            nivel_arl = objeto.arl
-            ccf = objeto.CCF
-            porcentaje_ibc = objeto.ibc
+            # Serializar los datos para enviar una respuesta JSON
+            serializer = CalculosSerializer(calculos)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        ibc = salario_base * (porcentaje_ibc / 100)
-        if ibc < 1300000:
-            ibc = 1300000
-
-        salud = ibc * 0.125
-        pension = ibc * 0.16
-
-        arl = self.calcular_arl(ibc, nivel_arl)
-
-        if ccf == 'Si':
-            ccf = ibc * 0.04
-        else:
-            ccf = 0
-
-        context = {
-            'independiente': independiente.numero_identificacion,
-            'salario_base': salario_base,
-            'ibc': ibc,
-            'salud': salud,
-            'pension': pension,
-            'arl': arl,
-            'ccf': ccf,
-        }
-
-        return JsonResponse(context)
-
-    @staticmethod
-    def calcular_arl(ibc, arl_nivel):
-        arl = 0
-        if arl_nivel == '1':
-            arl = ibc * 0.00522
-        elif arl_nivel == '2':
-            arl = ibc * 0.01044
-        elif arl_nivel == '3':
-            arl = ibc * 0.02436
-        elif arl_nivel == '4':
-            arl = ibc * 0.04350
-        elif arl_nivel == '5':
-            arl = ibc * 0.06960
-        elif arl_nivel == '0':
-            arl = 0
-        return arl
+        except Http404:
+            return Response({'error': 'No se encontró el objeto Independiente'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -38,7 +38,7 @@ class Independiente(models.Model):
     correo = models.EmailField(unique=True)
     celular = models.CharField(max_length=15)
     genero = models.CharField(max_length=10)
-    salairo_base=models.IntegerField(default=1300000)
+    salairo_base = models.FloatField()
     fecha_nacimiento = models.DateField()
     fecha_exp_documento = models.DateField()
     fecha_ingreso= models.DateField(blank=True, null=True)

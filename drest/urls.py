@@ -1,4 +1,5 @@
-
+from django.conf import settings # type: ignore
+from django.conf.urls.static import static # type: ignore
 from django.contrib import admin # type: ignore
 from django.urls import path, include # type: ignore
 from django.conf.urls.static import static # type: ignore
@@ -16,3 +17,5 @@ urlpatterns = [
     # path('docscalculos/',include_docs_urls(title='Documentation REST Calculos')),
     # path('docsnovedades/',include_docs_urls(title='Documentation REST Novedades')),
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
